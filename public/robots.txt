@@ -1,0 +1,10 @@
+# robots.txt for Local Business Growth Planner
+User-agent: *
+Allow: /
+Allow: /how-it-works
+Allow: /about
+Allow: /privacy
+
+# Private assessment & dashboard data are kept in client-side localStorage
+# and never published on public server URLs.
+Sitemap: https://localgrowthplanner.org/sitemap.xml

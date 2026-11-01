@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TapGrow — Plan • Improve • Grow | Local Business Growth Planner</title>
+    <meta name="description" content="TapGrow helps local businesses diagnose marketing performance, discover actionable growth opportunities, and track momentum with a step-by-step action plan." />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.png" />
+    <meta property="og:title" content="TapGrow — Plan • Improve • Grow | Local Business Growth Planner" />
+    <meta property="og:description" content="TapGrow helps local businesses diagnose marketing performance, discover actionable growth opportunities, and track momentum with a step-by-step action plan." />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="TapGrow" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="TapGrow — Plan • Improve • Grow" />
+    <meta name="twitter:description" content="TapGrow helps local businesses diagnose marketing performance, discover actionable growth opportunities, and track momentum." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "TapGrow",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "All",
+      "description": "Free, transparent marketing assessment and step-by-step action planner for independent shops, clinics, restaurants, and home service providers.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+    </script>
+    <script>
+      (function() {
+        try {
+          var stored = localStorage.getItem('local-business-growth-planner-theme');
+          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var theme = stored === 'dark' || (stored !== 'light' && prefersDark) ? 'dark' : 'light';
+          document.documentElement.setAttribute('data-theme', theme);
+          if (theme === 'dark') document.documentElement.classList.add('dark');
+          else document.documentElement.classList.remove('dark');
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body class="bg-[var(--bg-primary,#F6F8F7)] text-[var(--text-primary,#17242B)] antialiased selection:bg-[#DFF5EA] selection:text-[#0F5C4D]">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

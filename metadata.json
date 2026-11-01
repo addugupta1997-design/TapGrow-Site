@@ -1,0 +1,7 @@
+{
+  "name": "TapGrow",
+  "description": "Plan • Improve • Grow. Free, practical marketing assessment and action planner for local businesses to understand performance, identify gaps, and track momentum.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
