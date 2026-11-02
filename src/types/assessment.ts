@@ -29,7 +29,8 @@ export type MainGoal =
   | 'more_bookings'
   | 'trust_reviews'
   | 'website_improvement'
-  | 'marketing_consistency';
+  | 'marketing_consistency'
+  | 'customer_retention';
 
 export type PreferredFocus =
   | 'all'

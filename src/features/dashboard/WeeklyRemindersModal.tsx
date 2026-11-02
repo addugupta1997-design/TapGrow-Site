@@ -142,10 +142,10 @@ export const WeeklyRemindersModal: React.FC<WeeklyRemindersModalProps> = ({
             </div>
             <div>
               <h3 id="reminders-modal-title" className="text-base font-bold text-slate-900 dark:text-[#F2F7F5]">
-                Weekly Growth Reminders
+                Weekly Growth Digest & Briefing
               </h3>
               <p className="text-xs text-slate-500 dark:text-[#91A5A9]">
-                Get a weekly email digest summarizing remaining tasks and upcoming priorities
+                Prepare your weekly task digest to open in your email client or copy for your team
               </p>
             </div>
           </div>
@@ -161,6 +161,14 @@ export const WeeklyRemindersModal: React.FC<WeeklyRemindersModalProps> = ({
           </button>
         </div>
 
+        {/* Client-Side Architecture Transparency Notice */}
+        <div className="bg-emerald-50/70 dark:bg-[#16866F]/15 border-b border-emerald-100 dark:border-[#304650] px-6 py-2.5 text-xs text-slate-600 dark:text-[#B5C5C7] flex items-center gap-2">
+          <ShieldCheck className="h-4 w-4 text-[#16866F] dark:text-[#65D6B2] shrink-0" />
+          <span>
+            <strong>100% Client-Side Privacy:</strong> TapGrow does not run an automated background email server. Digests are generated locally and launched in your email client via <code className="font-mono text-[11px] bg-white dark:bg-[#1D3039] px-1 rounded">mailto:</code> or copied to clipboard.
+          </span>
+        </div>
+
         {/* Tab Switcher: Settings vs Live Digest Preview */}
         <div className="flex border-b border-slate-200 dark:border-[#304650] bg-slate-50/50 dark:bg-[#172830] px-6 pt-2">
           <button
@@ -173,10 +181,10 @@ export const WeeklyRemindersModal: React.FC<WeeklyRemindersModalProps> = ({
             }`}
           >
             <Sliders className="h-3.5 w-3.5" />
-            Reminder Preferences
+            Digest Settings
             {existingSub?.enabled && (
               <span className="rounded-full bg-emerald-100 dark:bg-emerald-950/60 px-1.5 py-0.5 text-[10px] font-bold text-[#0F5C4D] dark:text-[#65D6B2]">
-                Active
+                Saved
               </span>
             )}
           </button>
@@ -190,7 +198,7 @@ export const WeeklyRemindersModal: React.FC<WeeklyRemindersModalProps> = ({
             }`}
           >
             <Eye className="h-3.5 w-3.5" />
-            Live Email Preview
+            Preview & Export Email
           </button>
         </div>
 
@@ -200,9 +208,9 @@ export const WeeklyRemindersModal: React.FC<WeeklyRemindersModalProps> = ({
             <div className="flex items-center gap-2.5 rounded-lg border border-emerald-200 dark:border-emerald-800/40 bg-[#DFF5EA]/60 dark:bg-emerald-950/40 p-3 text-xs text-[#0F5C4D] dark:text-[#65D6B2] animate-in fade-in duration-200">
               <Check className="h-4 w-4 shrink-0 text-[#16866f] dark:text-[#65D6B2]" />
               <span>
-                <strong>Subscription updated!</strong> Your weekly reminder is set for{' '}
-                <span className="capitalize">{dayOfWeek}</span> at {timeOfDay} to{' '}
-                <strong>{email}</strong>.
+                <strong>Digest preferences saved!</strong> Configured for{' '}
+                <span className="capitalize">{dayOfWeek}</span> at {timeOfDay} to prefill{' '}
+                <strong>{email}</strong> in your email app.
               </span>
             </div>
           )}
@@ -215,7 +223,7 @@ export const WeeklyRemindersModal: React.FC<WeeklyRemindersModalProps> = ({
                   htmlFor="reminder-email"
                   className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-[#B5C5C7] mb-1.5"
                 >
-                  Delivery Email Address
+                  Your Email Address (For prefilling mailto links)
                 </label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-[#91A5A9]" />
@@ -233,8 +241,8 @@ export const WeeklyRemindersModal: React.FC<WeeklyRemindersModalProps> = ({
                   />
                 </div>
                 {emailError && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{emailError}</p>}
-                <p className="mt-1 text-[11px] text-slate-500 dark:text-[#91A5A9]">
-                  We only send task summaries and priority reminders. No spam, ever.
+                <p className="mt-1.5 text-[11px] text-slate-500 dark:text-[#91A5A9]">
+                  Stored strictly in your device's local storage to prefill the recipient field when generating email digests.
                 </p>
               </div>
 

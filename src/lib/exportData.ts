@@ -50,7 +50,7 @@ export function generatePrintableHtml(plan: SavedPlanState): string {
               <span class="task-priority priority-${task.priority.toLowerCase()}">${task.priority} Priority</span>
               <span class="task-meta">${task.category} · Effort: ${task.estimatedEffort} · ${task.suggestedTimeToComplete}</span>
             </div>
-            <div class="task-status">${isDone ? '✓ Completed' : task.status === 'in_progress' ? '⏳ In Progress' : '○ Not Started'}</div>
+            <div class="task-status">${isDone ? '✓ Completed' : task.status === 'in_progress' ? '⏳ In Progress' : task.status === 'deferred' ? '⏸ Deferred' : '○ Not Started'}</div>
           </div>
           <h3 class="task-title">${idx + 1}. ${task.title}</h3>
           <p class="task-summary">${task.summary}</p>

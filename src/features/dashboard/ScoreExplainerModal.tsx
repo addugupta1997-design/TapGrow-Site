@@ -116,6 +116,39 @@ export const ScoreExplainerModal: React.FC<ScoreExplainerModalProps> = ({
           </div>
         </div>
 
+        {/* How Completing Specific Actions Affects the Score */}
+        <div className="rounded-xl border border-slate-200 dark:border-[#304650] bg-white dark:bg-[#223640] p-4.5 mb-6 space-y-3">
+          <h4 className="text-sm font-bold text-slate-900 dark:text-[#F2F7F5] flex items-center gap-2">
+            <span>How Completing Actions Affects Your Score</span>
+          </h4>
+          <p className="text-xs text-slate-600 dark:text-[#B5C5C7] leading-relaxed">
+            Completing tasks in your TapGrow plan directly addresses the identified gaps above. Here is how progress correlates with your readiness:
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+            <div className="rounded-lg bg-slate-50 dark:bg-[#172830] p-2.5 border border-slate-100 dark:border-[#304650]">
+              <span className="font-semibold text-slate-800 dark:text-[#F2F7F5] block">Listing & NAP Verification:</span>
+              <span className="text-slate-500 dark:text-[#91A5A9]">Resolves visibility gaps, adding up to <strong>+20 to +35 pts</strong> to your profile setup.</span>
+            </div>
+            <div className="rounded-lg bg-slate-50 dark:bg-[#172830] p-2.5 border border-slate-100 dark:border-[#304650]">
+              <span className="font-semibold text-slate-800 dark:text-[#F2F7F5] block">Customer Review Routine:</span>
+              <span className="text-slate-500 dark:text-[#91A5A9]">Activates continuous social proof, contributing up to <strong>+15 pts</strong> in trust.</span>
+            </div>
+            <div className="rounded-lg bg-slate-50 dark:bg-[#172830] p-2.5 border border-slate-100 dark:border-[#304650]">
+              <span className="font-semibold text-slate-800 dark:text-[#F2F7F5] block">Conversion & Clarity:</span>
+              <span className="text-slate-500 dark:text-[#91A5A9]">Adding friction-free CTAs and transparent pricing recovers up to <strong>+15 to +30 pts</strong>.</span>
+            </div>
+            <div className="rounded-lg bg-slate-50 dark:bg-[#172830] p-2.5 border border-slate-100 dark:border-[#304650]">
+              <span className="font-semibold text-slate-800 dark:text-[#F2F7F5] block">Inquiry Tracking & Habits:</span>
+              <span className="text-slate-500 dark:text-[#91A5A9]">Documenting weekly lead sources establishes <strong>+10 to +20 pts</strong> in consistency.</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Explicit Non-Guarantee Disclaimer */}
+        <div className="rounded-lg bg-amber-50/60 dark:bg-amber-950/25 p-3.5 border border-amber-200/80 dark:border-amber-800/40 text-[11px] text-amber-900 dark:text-[#E9A23B] leading-relaxed mb-6">
+          <strong>Non-Guarantee & Transparency Notice:</strong> The TapGrow Readiness Score is a deterministic diagnostic benchmark of your self-reported marketing foundations and operational setup. It does not represent an actual Google Maps or Search algorithm ranking, and does not guarantee specific visitor numbers or business revenue.
+        </div>
+
         <div className="border-t border-slate-100 dark:border-[#304650] pt-4 flex justify-end">
           <button
             type="button"

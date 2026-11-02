@@ -1,6 +1,8 @@
 import { AssessmentAnswers } from '../../types/assessment';
-import { GeneratedTask, PriorityLevel } from '../../types/recommendations';
+import { GeneratedTask, PriorityLevel, TaskStatus } from '../../types/recommendations';
 import { RECOMMENDATION_CATALOG } from './recommendationCatalog';
+import { buildBusinessIntelligenceProfile } from './businessProfile';
+import { rankRecommendation } from './recommendationRanker';
 
 const PRIORITY_ORDER: Record<PriorityLevel, number> = {
   High: 1,
@@ -9,21 +11,65 @@ const PRIORITY_ORDER: Record<PriorityLevel, number> = {
 };
 
 /**
- * Generates deterministic, prioritized recommendations matching the user's assessment answers.
- * Implements category personalization, capacity throttling, duplicate prevention, and suggested next steps.
+ * Generates deterministic, business-specific marketing recommendations (V2).
+ * Integrates structured business intelligence profiling, multi-factor ranking,
+ * prerequisite dependency tracking, and dynamic explanation generation.
  */
-export function generateRecommendations(answers: AssessmentAnswers): GeneratedTask[] {
-  // 1. Filter applicable templates based on conditions and category rules
+export function generateRecommendations(
+  answers: AssessmentAnswers,
+  existingTasks?: GeneratedTask[]
+): GeneratedTask[] {
+  // 1. Build business intelligence profile without assuming unstated information
+  const profile = buildBusinessIntelligenceProfile(answers);
+
+  // Set of completed task IDs to evaluate prerequisites and preserve history
+  const completedTaskIds = new Set<string>();
+  const existingTaskMap = new Map<string, GeneratedTask>();
+
+  if (existingTasks && existingTasks.length > 0) {
+    existingTasks.forEach((t) => {
+      existingTaskMap.set(t.templateId, t);
+      existingTaskMap.set(t.id, t);
+      if (t.status === 'completed') {
+        completedTaskIds.add(t.templateId);
+        completedTaskIds.add(t.id);
+      }
+    });
+  }
+
+  // 2. Filter applicable templates based on business model and intelligence rules
   const applicableTemplates = RECOMMENDATION_CATALOG.filter((template) => {
     try {
+      // Rule A: If no website, do NOT recommend website conversion/clarity/schema audits
+      if (profile.hasWebsite === false) {
+        if (
+          template.id === 'rec_website_clarity' ||
+          template.id === 'rec_local_schema' ||
+          template.id === 'rec_mobile_speed'
+        ) {
+          return false;
+        }
+      }
+
+      // If online-only business, exclude physical map pack setups
+      if (profile.businessModel === 'online_only') {
+        if (
+          template.id === 'rec_gbp_setup' ||
+          template.id === 'rec_apple_bing_listings' ||
+          template.id === 'rec_gbp_attributes_photos'
+        ) {
+          return false;
+        }
+      }
+
       return template.isApplicable(answers);
     } catch (err) {
-      console.error(`Error evaluating condition for template ${template.id}:`, err);
+      console.error(`Error checking applicability for template ${template.id}:`, err);
       return false;
     }
   });
 
-  // 2. Prevent duplicate templates by ID
+  // 3. Prevent duplicate template IDs
   const seenTemplateIds = new Set<string>();
   const uniqueTemplates = applicableTemplates.filter((tpl) => {
     if (seenTemplateIds.has(tpl.id)) return false;
@@ -31,90 +77,87 @@ export function generateRecommendations(answers: AssessmentAnswers): GeneratedTa
     return true;
   });
 
-  // 3. Map into full GeneratedTask items with evaluated priority
+  // 4. Map into full GeneratedTask items with intelligent multi-factor ranking
   let generatedTasks: GeneratedTask[] = uniqueTemplates.map((tpl) => {
-    let priority: PriorityLevel = tpl.defaultPriority;
-    let priorityReason: string = tpl.defaultPriorityReason;
+    const ranking = rankRecommendation(tpl, answers, profile, completedTaskIds);
 
-    if (tpl.evaluatePriority) {
-      try {
-        const evalResult = tpl.evaluatePriority(answers);
-        priority = evalResult.priority;
-        priorityReason = evalResult.reason;
-      } catch (err) {
-        console.error(`Error evaluating priority for ${tpl.id}:`, err);
-      }
+    // Check if task previously existed in storage
+    const existing = existingTaskMap.get(tpl.id) || existingTaskMap.get(`task_${tpl.id}`);
+
+    // Check prerequisite unlocking
+    let isUnlocked = true;
+    if (tpl.prerequisites && tpl.prerequisites.length > 0) {
+      isUnlocked = tpl.prerequisites.every((req) => completedTaskIds.has(req) || completedTaskIds.has(`task_${req}`));
     }
 
-    // Dynamic adjustment based on user preferred focus
-    if (answers.preferredFocus && answers.preferredFocus !== 'all') {
-      if (answers.preferredFocus === 'reviews' && tpl.category === 'Reviews and reputation') {
-        priority = 'High';
-      } else if (answers.preferredFocus === 'website' && (tpl.category === 'Website basics' || tpl.category === 'Conversion improvements')) {
-        priority = 'High';
-      } else if (answers.preferredFocus === 'local_seo' && (tpl.category === 'Local SEO' || tpl.category === 'Business listings')) {
-        priority = 'High';
-      } else if (answers.preferredFocus === 'social_media' && tpl.category === 'Social media') {
-        priority = 'High';
-      }
-    }
-
-    // Dynamic adjustment for free-only budget preferences
-    if (answers.budgetPreference === 'free_only') {
-      if (tpl.tags.includes('free') || tpl.tags.includes('organic') || tpl.tags.includes('google-reviews') || tpl.tags.includes('nap')) {
-        // preserve high
-      }
-    }
-
-    // Time-based weekly grouping
+    // Suggested schedule grouping based on priority and week
     let weeklyGroup = 1;
     if (tpl.suggestedTimeToComplete === 'Week 2') weeklyGroup = 2;
     else if (tpl.suggestedTimeToComplete === 'Week 3') weeklyGroup = 3;
     else if (tpl.suggestedTimeToComplete === 'Week 4') weeklyGroup = 4;
 
-    // Adjust high priority items into earlier weeks
-    if (priority === 'High' && weeklyGroup > 2) {
+    if (ranking.priority === 'High' && weeklyGroup > 2) {
       weeklyGroup = 2;
     }
+
+    const taskStatus: TaskStatus = existing ? existing.status : 'not_started';
+    const completedAt = existing ? existing.completedAt : null;
+    const notes = existing ? existing.notes || '' : '';
 
     return {
       id: `task_${tpl.id}`,
       templateId: tpl.id,
       title: tpl.title,
       category: tpl.category,
-      priority,
-      priorityReason,
+      priority: ranking.priority,
+      priorityReason: ranking.priorityReason,
       summary: tpl.summary,
       whyItMatters: tpl.whyItMatters,
-      instructions: [...tpl.instructions],
+      problemAddressed: tpl.problemAddressed,
+      expectedBenefit: tpl.expectedBenefit,
       estimatedEffort: tpl.estimatedEffort,
+      difficultyLevel: tpl.difficultyLevel,
+      requiredResources: tpl.requiredResources,
+      instructions: [...tpl.instructions],
       suggestedTimeToComplete: tpl.suggestedTimeToComplete,
       prerequisites: tpl.prerequisites ? [...tpl.prerequisites] : undefined,
       referenceUrl: tpl.referenceUrl,
       referenceTitle: tpl.referenceTitle,
       completionCriteria: tpl.completionCriteria,
-      suggestedNextStep: tpl.suggestedNextStep || 'Review the step-by-step instructions and schedule time this week.',
+      suggestedNextStep:
+        tpl.suggestedNextStep ||
+        'Review the step-by-step instructions and schedule time this week.',
       tags: [...tpl.tags],
-      status: 'not_started',
-      completedAt: null,
-      notes: '',
+      status: taskStatus,
+      completedAt,
+      notes,
       weeklyScheduleGroup: weeklyGroup,
+      whySeeingThis: ranking.whySeeingThis,
+      rankingScore: ranking.score,
+      isUnlocked,
     };
   });
 
-  // 4. Sort tasks: High priority first, then Medium, then Low; then by weekly group
+  // 5. Deterministic sorting:
+  // High priority first, then Medium, then Low; then by internal rankingScore descending; then by weekly group
   generatedTasks.sort((a, b) => {
     const pDiff = PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority];
     if (pDiff !== 0) return pDiff;
+
+    if (b.rankingScore !== undefined && a.rankingScore !== undefined) {
+      const scoreDiff = b.rankingScore - a.rankingScore;
+      if (scoreDiff !== 0) return scoreDiff;
+    }
+
     return a.weeklyScheduleGroup - b.weeklyScheduleGroup;
   });
 
-  // 5. Throttling for low capacity (under 1 hour per week):
-  // Prioritize the top highest-leverage actions to prevent overwhelming the user
-  if (answers.weeklyHours === 'under_1h' && generatedTasks.length > 7) {
+  // 6. Capacity Throttling for very limited weekly time (under 1 hour per week):
+  // Preserve all High priority tasks and throttle lower-priority actions to avoid owner overwhelm
+  if (profile.isTimeConstrained && generatedTasks.length > 7) {
     const highTasks = generatedTasks.filter((t) => t.priority === 'High');
     const otherTasks = generatedTasks.filter((t) => t.priority !== 'High');
-    // Ensure we keep all high priority tasks plus up to 2 essential others
+    // Ensure we keep all high priority tasks plus up to 2 top-ranked medium tasks
     generatedTasks = [...highTasks, ...otherTasks.slice(0, 2)];
   }
 

@@ -1,5 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { GeneratedTask, TaskStatus, PriorityLevel, RecommendationCategory } from '../../types/recommendations';
+import {
+  GeneratedTask,
+  TaskStatus,
+  PriorityLevel,
+  RecommendationCategory,
+} from '../../types/recommendations';
 import { TaskCard } from './TaskCard';
 import { EmptyState } from '../../components/EmptyState';
 import { Search, Filter, RotateCcw } from 'lucide-react';
@@ -24,7 +29,8 @@ export const TaskList: React.FC<TaskListProps> = ({
   const [internalCategoryFilter, setInternalCategoryFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const categoryFilter = activeCategoryFilter !== undefined ? activeCategoryFilter : internalCategoryFilter;
+  const categoryFilter =
+    activeCategoryFilter !== undefined ? activeCategoryFilter : internalCategoryFilter;
   const setCategoryFilter = (cat: string) => {
     if (onCategoryFilterChange) {
       onCategoryFilterChange(cat);
@@ -59,7 +65,10 @@ export const TaskList: React.FC<TaskListProps> = ({
         const matchesSummary = task.summary.toLowerCase().includes(query);
         const matchesCategory = task.category.toLowerCase().includes(query);
         const matchesTags = task.tags.some((t) => t.toLowerCase().includes(query));
-        if (!matchesTitle && !matchesSummary && !matchesCategory && !matchesTags) {
+        const matchesProblem = task.problemAddressed
+          ? task.problemAddressed.toLowerCase().includes(query)
+          : false;
+        if (!matchesTitle && !matchesSummary && !matchesCategory && !matchesTags && !matchesProblem) {
           return false;
         }
       }
@@ -93,7 +102,7 @@ export const TaskList: React.FC<TaskListProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search recommendations by title, category, or keyword..."
+              placeholder="Search recommendations by title, category, problem, or keyword..."
               className="h-9 w-full rounded-lg border border-slate-200 dark:border-[#304650] bg-slate-50/50 dark:bg-[#172830] pl-9 pr-3 text-xs text-slate-900 dark:text-[#F2F7F5] placeholder:text-slate-400 dark:placeholder:text-[#91A5A9] focus:border-[#16866F] dark:focus:border-[#65D6B2] focus:bg-white dark:focus:bg-[#172830] focus:ring-1 focus:ring-[#16866F] dark:focus:ring-[#65D6B2] focus:outline-none"
             />
           </div>
@@ -119,7 +128,7 @@ export const TaskList: React.FC<TaskListProps> = ({
         {/* Priority and Status Segmented Controls */}
         <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-[#304650] text-xs">
           {/* Priority Tabs */}
-          <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-[#172830] rounded-lg">
+          <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-[#172830] rounded-lg overflow-x-auto max-w-full scrollbar-none">
             {(
               [
                 { id: 'all', label: 'All Priorities' },
@@ -132,7 +141,7 @@ export const TaskList: React.FC<TaskListProps> = ({
                 key={tab.id}
                 type="button"
                 onClick={() => setPriorityFilter(tab.id)}
-                className={`h-7 inline-flex items-center justify-center px-2.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap ${
+                className={`h-7 inline-flex items-center justify-center px-2.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap shrink-0 ${
                   priorityFilter === tab.id
                     ? 'bg-white dark:bg-[#223640] text-slate-900 dark:text-white shadow-2xs font-semibold'
                     : 'text-slate-600 dark:text-[#B5C5C7] hover:text-slate-900 dark:hover:text-white'
@@ -144,20 +153,21 @@ export const TaskList: React.FC<TaskListProps> = ({
           </div>
 
           {/* Status Tabs */}
-          <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-[#172830] rounded-lg">
+          <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-[#172830] rounded-lg overflow-x-auto max-w-full scrollbar-none">
             {(
               [
                 { id: 'all', label: 'All Statuses' },
-                { id: 'not_started', label: 'Not Started' },
+                { id: 'not_started', label: 'To Do' },
                 { id: 'in_progress', label: 'In Progress' },
                 { id: 'completed', label: 'Completed' },
+                { id: 'deferred', label: 'Deferred' },
               ] as { id: 'all' | TaskStatus; label: string }[]
             ).map((tab) => (
               <button
                 key={tab.id}
                 type="button"
                 onClick={() => setStatusFilter(tab.id)}
-                className={`h-7 inline-flex items-center justify-center px-2.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap ${
+                className={`h-7 inline-flex items-center justify-center px-2.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap shrink-0 ${
                   statusFilter === tab.id
                     ? 'bg-white dark:bg-[#223640] text-slate-900 dark:text-white shadow-2xs font-semibold'
                     : 'text-slate-600 dark:text-[#B5C5C7] hover:text-slate-900 dark:hover:text-white'

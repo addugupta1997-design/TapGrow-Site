@@ -1,22 +1,29 @@
-import { AssessmentAnswers } from './assessment';
+import { AssessmentAnswers, BusinessCategory, MainGoal } from './assessment';
 
 export type RecommendationCategory =
   | 'Local SEO'
   | 'Business listings'
+  | 'Google Business Profile'
   | 'Reviews and reputation'
   | 'Website basics'
   | 'Social media'
   | 'Content marketing'
   | 'Conversion improvements'
-  | 'Measurement and consistency';
+  | 'Customer acquisition'
+  | 'Marketing measurement'
+  | 'Measurement and consistency'
+  | 'Customer retention';
 
 export type PriorityLevel = 'High' | 'Medium' | 'Low';
 
-export type TaskStatus = 'not_started' | 'in_progress' | 'completed';
+export type TaskStatus = 'not_started' | 'in_progress' | 'completed' | 'deferred';
+
+export type DifficultyLevel = 'Beginner' | 'Intermediate' | 'Advanced';
 
 export interface PriorityEvaluation {
   priority: PriorityLevel;
   reason: string;
+  score?: number;
 }
 
 export interface RecommendationTemplate {
@@ -26,10 +33,19 @@ export interface RecommendationTemplate {
   defaultPriority: PriorityLevel;
   summary: string;
   whyItMatters: string;
-  instructions: string[];
+  /** What problem this recommendation directly addresses */
+  problemAddressed: string;
+  /** Concrete expected business benefit */
+  expectedBenefit: string;
+  /** Estimated time duration to complete */
   estimatedEffort: string; // e.g. "30-45 mins", "1-2 hours"
+  /** Skill or difficulty tier */
+  difficultyLevel: DifficultyLevel;
+  /** Minimum tools, equipment, or assets needed */
+  requiredResources: string;
+  instructions: string[];
   suggestedTimeToComplete: string; // e.g. "Week 1", "Week 2"
-  prerequisites?: string[];
+  prerequisites?: string[]; // IDs of templates that should be completed before this
   referenceUrl?: string;
   referenceTitle?: string;
   completionCriteria: string;
@@ -37,6 +53,14 @@ export interface RecommendationTemplate {
   tags: string[];
   version: number;
   defaultPriorityReason: string;
+  /** Business categories this template specifically targets, or 'all' */
+  businessCategories?: BusinessCategory[] | 'all';
+  /** Primary goals this template directly helps achieve, or 'all' */
+  targetGoals?: MainGoal[] | 'all';
+  /** Estimated relative business impact (1-10) */
+  baseImpactScore?: number;
+  /** Estimated relative effort penalty (1-10) */
+  baseEffortScore?: number;
   /** Function determining whether this task is relevant for the business */
   isApplicable: (answers: AssessmentAnswers) => boolean;
   /** Evaluates dynamic priority and plain-language reason based on business profile */
@@ -52,8 +76,12 @@ export interface GeneratedTask {
   priorityReason: string;
   summary: string;
   whyItMatters: string;
-  instructions: string[];
+  problemAddressed?: string;
+  expectedBenefit?: string;
   estimatedEffort: string;
+  difficultyLevel?: DifficultyLevel;
+  requiredResources?: string;
+  instructions: string[];
   suggestedTimeToComplete: string;
   prerequisites?: string[];
   referenceUrl?: string;
@@ -65,6 +93,12 @@ export interface GeneratedTask {
   completedAt?: string | null;
   notes?: string;
   weeklyScheduleGroup: number; // 1 = Week 1, 2 = Week 2, 3 = Week 3, 4 = Ongoing
+  /** Clear explanation of why this specific recommendation appears for this business */
+  whySeeingThis?: string;
+  /** Calculated internal multi-factor ranking score */
+  rankingScore?: number;
+  /** Whether all prerequisite tasks have been completed */
+  isUnlocked?: boolean;
 }
 
 export interface ScoreCategoryBreakdown {
@@ -75,7 +109,10 @@ export interface ScoreCategoryBreakdown {
 }
 
 export interface ScoreResult {
-  totalScore: number; // 0 - 100
+  totalScore: number; // 0 - 100 (including confirmed completed actions)
+  baseScore?: number; // Initial score from assessment answers
+  confirmedBoost?: number; // Meaningful score increase from confirmed completed tasks
+  confirmedCompletedTasksCount?: number;
   interpretation: string;
   evaluatedQuestionsCount: number;
   totalApplicableWeight: number;

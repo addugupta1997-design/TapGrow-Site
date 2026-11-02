@@ -233,10 +233,10 @@ export const HeroGrowthIllustration: React.FC<HeroGrowthIllustrationProps> = ({
             <circle cx="234" cy="14" r="4.5" className="hero-warning-fill hero-surface-primary" strokeWidth="2" />
 
             <text x="24" y="66" className="hero-text-muted font-sans text-[9px] font-semibold">
-              Weekly Local Customer Inquiries
+              Illustrative Growth Trajectory (Sample Data)
             </text>
-            <text x="180" y="66" className="hero-brand-fill font-sans text-[9px] font-bold">
-              +142% Momentum
+            <text x="176" y="66" className="hero-brand-fill font-sans text-[9px] font-bold">
+              Progress Model
             </text>
           </g>
         </g>
@@ -300,7 +300,7 @@ export const HeroGrowthIllustration: React.FC<HeroGrowthIllustrationProps> = ({
             className="hero-warning-fill"
           />
           <text x="60" y="27" className="hero-text-primary font-sans text-[11px] font-bold">
-            5.0 Star Reputation
+            Reputation Routine
           </text>
           {/* 5 Star Row */}
           <g transform="translate(60, 34)">
@@ -313,7 +313,7 @@ export const HeroGrowthIllustration: React.FC<HeroGrowthIllustrationProps> = ({
             ))}
           </g>
           <text x="60" y="56" className="hero-text-muted font-sans text-[9px] font-medium">
-            128 Verified Happy Clients
+            Standard Review Habit (Goal)
           </text>
         </g>
 

@@ -310,6 +310,9 @@ export function generatePdfReport(
     } else if (task.status === 'in_progress') {
       doc.setTextColor(217, 119, 6);
       doc.text('IN PROGRESS', pageWidth - margin - 4, y + 5, { align: 'right' });
+    } else if (task.status === 'deferred') {
+      doc.setTextColor(148, 163, 184);
+      doc.text('DEFERRED', pageWidth - margin - 4, y + 5, { align: 'right' });
     } else {
       doc.setTextColor(148, 163, 184);
       doc.text('NOT STARTED', pageWidth - margin - 4, y + 5, { align: 'right' });

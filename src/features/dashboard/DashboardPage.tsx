@@ -11,7 +11,8 @@ import { PrintReportModal } from './PrintReportModal';
 import { WeeklyRemindersModal } from './WeeklyRemindersModal';
 import { exportPlanToJson, printPlanReport } from '../../lib/exportData';
 import { getShareablePlanUrl } from '../../lib/sharePlan';
-import { updateTaskInStorage } from '../../lib/storage';
+import { updateTaskInStorage, savePlanToStorage } from '../../lib/storage';
+import { calculateReadinessScore } from '../recommendations/scoring';
 import { formatDate } from '../../locales/i18n';
 import { TapGrowSymbol } from '../../components/brand/TapGrowLogo';
 import {
@@ -33,6 +34,8 @@ import {
   Compass,
   Tag,
   Bell,
+  MoreHorizontal,
+  ChevronDown,
 } from 'lucide-react';
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -65,6 +68,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
   const [isRemindersModalOpen, setIsRemindersModalOpen] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [isMobileActionsOpen, setIsMobileActionsOpen] = useState(false);
 
   const handleSelectCategoryFromPulse = (category: string) => {
     setSelectedCategoryFilter(category);
@@ -79,9 +83,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   const locationDisplay = [plan.answers.cityArea, plan.answers.country].filter(Boolean).join(', ');
   const categoryLabel = CATEGORY_LABELS[plan.answers.category] || 'Local Business';
 
-  // Extract top 3 highest-leverage incomplete tasks
+  // Extract top 3 highest-leverage incomplete tasks (excluding completed & deferred)
   const topThreeTasks = plan.tasks
-    .filter((t) => t.status !== 'completed')
+    .filter((t) => t.status !== 'completed' && t.status !== 'deferred')
     .slice(0, 3);
 
   const handleCopyPlanLink = async () => {
@@ -114,7 +118,14 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
       completedAt: newStatus === 'completed' ? new Date().toISOString() : null,
     }));
     if (updated) {
-      onPlanUpdated(updated);
+      // Meaningfully recalculate readiness score with confirmed completed actions
+      const recalculatedScore = calculateReadinessScore(updated.answers, updated.tasks);
+      const fullyUpdated = {
+        ...updated,
+        scoreResult: recalculatedScore,
+      };
+      savePlanToStorage(fullyUpdated);
+      onPlanUpdated(fullyUpdated);
     }
   };
 
@@ -177,8 +188,99 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           </div>
         </div>
 
-        {/* Action Buttons Toolbar - Aligned in a straight line */}
-        <div className="flex items-center gap-2 flex-nowrap overflow-x-auto max-w-full py-0.5 scrollbar-none shrink-0">
+        {/* Mobile Toolbar (< 640px): Prevents horizontal overflow, big touch targets, and accessible secondary menu */}
+        <div className="flex sm:hidden flex-col gap-2 w-full pt-1">
+          <div className="grid grid-cols-2 gap-2 w-full">
+            <button
+              type="button"
+              onClick={handlePrint}
+              className="h-10 inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#16866F] px-3 text-xs font-semibold text-white shadow-xs hover:bg-[#0F5C4D] dark:bg-[#16866F] dark:hover:bg-[#1A9B80] transition-colors"
+              title="Download Plan as PDF"
+            >
+              <Download className="h-4 w-4" />
+              <span>Download PDF</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleCopyPlanLink}
+              className={`h-10 inline-flex items-center justify-center gap-1.5 rounded-lg border px-3 text-xs font-semibold transition-all ${
+                copiedLink
+                  ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-[#65D6B2]'
+                  : 'border-slate-200 dark:border-[#304650] bg-white dark:bg-[#1D3039] text-slate-700 dark:text-[#F2F7F5]'
+              }`}
+              title="Serialize plan and copy shareable link"
+            >
+              {copiedLink ? (
+                <>
+                  <Check className="h-4 w-4 text-emerald-600 dark:text-[#65D6B2]" />
+                  <span>Link Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Share2 className="h-4 w-4 text-slate-500 dark:text-[#91A5A9]" />
+                  <span>Share Plan</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setIsMobileActionsOpen(!isMobileActionsOpen)}
+              className="h-9 w-full inline-flex items-center justify-between rounded-lg border border-slate-200 dark:border-[#304650] bg-white dark:bg-[#1D3039] px-3 text-xs font-semibold text-slate-700 dark:text-[#F2F7F5] shadow-2xs hover:bg-slate-50 dark:hover:bg-[#223640] transition-colors"
+              aria-expanded={isMobileActionsOpen}
+            >
+              <span className="flex items-center gap-1.5">
+                <MoreHorizontal className="h-4 w-4 text-slate-400 dark:text-[#91A5A9]" />
+                More Plan Options
+              </span>
+              <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform ${isMobileActionsOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {isMobileActionsOpen && (
+              <div className="mt-1 rounded-lg border border-slate-200 dark:border-[#304650] bg-white dark:bg-[#1D3039] p-1.5 shadow-lg space-y-1 animate-in fade-in duration-100 z-20">
+                <button
+                  type="button"
+                  onClick={() => {
+                    onEditAssessment();
+                    setIsMobileActionsOpen(false);
+                  }}
+                  className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-slate-700 dark:text-[#F2F7F5] hover:bg-slate-50 dark:hover:bg-[#223640]"
+                >
+                  <Edit3 className="h-3.5 w-3.5 text-slate-400 dark:text-[#91A5A9]" />
+                  <span>Edit Assessment Answers</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsRemindersModalOpen(true);
+                    setIsMobileActionsOpen(false);
+                  }}
+                  className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-slate-700 dark:text-[#F2F7F5] hover:bg-slate-50 dark:hover:bg-[#223640]"
+                >
+                  <Bell className="h-3.5 w-3.5 text-slate-400 dark:text-[#91A5A9]" />
+                  <span>Weekly Digest & Reminders</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClearPlanPrompt();
+                    setIsMobileActionsOpen(false);
+                  }}
+                  className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-red-600 dark:text-[#F07171] hover:bg-red-50 dark:hover:bg-red-950/30"
+                >
+                  <RotateCcw className="h-3.5 w-3.5 text-red-500" />
+                  <span>Clear Saved Plan</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Desktop & Tablet Toolbar (640px+): Aligned in a straight line */}
+        <div className="hidden sm:flex items-center gap-2 flex-nowrap overflow-x-auto max-w-full py-0.5 scrollbar-none shrink-0">
           <button
             type="button"
             onClick={onEditAssessment}
@@ -259,6 +361,18 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         tasks={plan.tasks}
         selectedCategory={selectedCategoryFilter}
         onSelectCategory={handleSelectCategoryFromPulse}
+        onStartTask={(taskId) => {
+          handleStatusChange(taskId, 'in_progress');
+          setActiveTab('checklist');
+          const el = document.getElementById(taskId);
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }}
+        onViewAllTasks={() => {
+          setActiveTab('checklist');
+          setSelectedCategoryFilter('all');
+          const tasksSection = document.getElementById('tasks-view-section');
+          if (tasksSection) tasksSection.scrollIntoView({ behavior: 'smooth' });
+        }}
       />
 
       {/* Personalized Assessment Summary & Insights */}
@@ -415,18 +529,18 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold text-slate-900 dark:text-[#F2F7F5]">
-                {plan.remindersSubscription?.enabled ? 'Weekly Reminders Active' : 'Get Weekly Growth Reminders'}
+                {plan.remindersSubscription?.enabled ? 'Weekly Digest Configured' : 'Weekly Growth Digest & Briefing'}
               </span>
               {plan.remindersSubscription?.enabled && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 dark:bg-emerald-950/50 px-2 py-0.5 text-[10px] font-bold text-[#0F5C4D] dark:text-[#65D6B2]">
-                  <Check className="h-2.5 w-2.5" /> Subscribed
+                  <Check className="h-2.5 w-2.5" /> Ready
                 </span>
               )}
             </div>
             <p className="text-xs text-slate-500 dark:text-[#91A5A9] mt-0.5">
               {plan.remindersSubscription?.enabled
-                ? `Sending task summaries every ${plan.remindersSubscription.dayOfWeek} at ${plan.remindersSubscription.timeOfDay} to ${plan.remindersSubscription.email}`
-                : 'Receive a weekly email digest summarizing your remaining tasks and upcoming priorities.'}
+                ? `Digest prepared for ${plan.remindersSubscription.dayOfWeek} at ${plan.remindersSubscription.timeOfDay} (recipient: ${plan.remindersSubscription.email})`
+                : 'Prepare a personalized task digest to launch in your email client or copy to your calendar.'}
             </p>
           </div>
         </div>

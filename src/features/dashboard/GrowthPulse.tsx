@@ -15,31 +15,46 @@ import {
   BarChart3,
   Layers,
   ArrowUpRight,
+  Users,
+  Repeat,
 } from 'lucide-react';
 
 interface GrowthPulseProps {
   tasks: GeneratedTask[];
   selectedCategory?: string;
   onSelectCategory?: (category: string) => void;
+  onStartTask?: (taskId: string) => void;
+  onViewAllTasks?: () => void;
 }
 
 const CATEGORY_ICONS: Record<RecommendationCategory, React.ComponentType<{ className?: string }>> = {
   'Local SEO': Compass,
   'Business listings': MapPin,
+  'Google Business Profile': MapPin,
   'Reviews and reputation': Star,
   'Website basics': Globe,
   'Social media': Share2,
   'Content marketing': FileText,
   'Conversion improvements': Target,
+  'Customer acquisition': Users,
+  'Marketing measurement': BarChart3,
   'Measurement and consistency': BarChart3,
+  'Customer retention': Repeat,
 };
 
 export const GrowthPulse: React.FC<GrowthPulseProps> = ({
   tasks,
   selectedCategory = 'all',
   onSelectCategory,
+  onStartTask,
+  onViewAllTasks,
 }) => {
   const pulse = calculateGrowthPulse(tasks);
+
+  // Identify the single highest-leverage next best action (in-progress first, or top active to-do, ignoring deferred)
+  const nextBestAction =
+    tasks.find((t) => t.status === 'in_progress') ||
+    tasks.find((t) => t.status !== 'completed' && t.status !== 'deferred');
 
   // Momentum badge styling based on velocity level
   const getMomentumBadge = () => {
@@ -76,7 +91,7 @@ export const GrowthPulse: React.FC<GrowthPulseProps> = ({
   const badgeStyle = getMomentumBadge();
 
   return (
-    <div className="no-print rounded-xl border border-slate-200/90 dark:border-[#304650] bg-white dark:bg-[#1D3039] p-5 shadow-xs space-y-4 transition-colors duration-150">
+    <div className="no-print rounded-xl border border-slate-200/90 dark:border-[#304650] bg-white dark:bg-[#1D3039] p-5 shadow-xs space-y-5 transition-colors duration-150">
       {/* Header section with momentum badge & overall progress */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 dark:border-[#304650] pb-4">
         <div className="flex items-center gap-3">
@@ -126,6 +141,95 @@ export const GrowthPulse: React.FC<GrowthPulseProps> = ({
             />
           </div>
         </div>
+      </div>
+
+      {/* 2. Personalised "Your Next Best Action" Spotlight */}
+      <div className="rounded-xl border border-emerald-200/80 dark:border-emerald-800/60 bg-gradient-to-br from-[#E0F5EE]/40 via-white to-transparent dark:from-[#16866F]/15 dark:via-[#1D3039] dark:to-[#172830] p-4.5 sm:p-5 shadow-2xs">
+        {nextBestAction ? (
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="space-y-1.5 flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1 rounded-md bg-[#16866F] px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider">
+                  <Target className="h-3 w-3" />
+                  Your Next Best Action
+                </span>
+                <span
+                  className={`inline-flex items-center gap-1 font-semibold text-xs ${
+                    nextBestAction.priority === 'High'
+                      ? 'text-red-700 dark:text-[#F07171]'
+                      : 'text-amber-700 dark:text-[#E9A23B]'
+                  }`}
+                >
+                  <span
+                    className={`h-1.5 w-1.5 rounded-full ${
+                      nextBestAction.priority === 'High' ? 'bg-red-500' : 'bg-amber-500'
+                    }`}
+                  />
+                  {nextBestAction.priority} Priority
+                </span>
+                <span aria-hidden="true" className="text-slate-300 dark:text-[#304650]">·</span>
+                <span className="text-xs text-slate-500 dark:text-[#91A5A9] flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  Est. {nextBestAction.estimatedEffort}
+                </span>
+                <span aria-hidden="true" className="text-slate-300 dark:text-[#304650]">·</span>
+                <span className="text-xs text-slate-500 dark:text-[#91A5A9] font-medium">
+                  {nextBestAction.category}
+                </span>
+              </div>
+
+              <h4 className="text-sm sm:text-base font-bold text-slate-900 dark:text-[#F2F7F5] line-clamp-2">
+                {nextBestAction.title}
+              </h4>
+              <p className="text-xs text-slate-600 dark:text-[#B5C5C7] line-clamp-2 leading-relaxed">
+                <strong className="text-slate-800 dark:text-[#F2F7F5]">Why it matters: </strong>
+                {nextBestAction.whyItMatters}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2.5 shrink-0 pt-1 md:pt-0">
+              <button
+                type="button"
+                onClick={() => onStartTask?.(nextBestAction.id)}
+                className="h-9 inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#16866F] px-4 text-xs font-semibold text-white shadow-2xs hover:bg-[#0F5C4D] dark:hover:bg-[#1A9B80] transition-colors focus:outline-none focus:ring-2 focus:ring-[#16866F]"
+              >
+                <ArrowUpRight className="h-3.5 w-3.5" />
+                <span>{nextBestAction.status === 'in_progress' ? 'Continue Task' : 'Start Task'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={onViewAllTasks}
+                className="h-9 inline-flex items-center justify-center rounded-lg border border-slate-300 dark:border-[#304650] bg-white dark:bg-[#1D3039] px-3.5 text-xs font-semibold text-slate-700 dark:text-[#F2F7F5] hover:bg-slate-50 dark:hover:bg-[#223640] transition-colors focus:outline-none focus:ring-2 focus:ring-[#16866F]"
+              >
+                View All Recommendations
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-[#16866F] dark:text-[#65D6B2]">
+                <CheckCircle2 className="h-5 w-5" />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-slate-900 dark:text-[#F2F7F5]">
+                  All Recommended Actions Completed!
+                </h4>
+                <p className="text-xs text-slate-500 dark:text-[#91A5A9]">
+                  Excellent momentum. Continue tracking inquiries and inviting customer reviews.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={onViewAllTasks}
+              className="h-9 inline-flex items-center justify-center rounded-lg border border-slate-300 dark:border-[#304650] bg-white dark:bg-[#1D3039] px-3.5 text-xs font-semibold text-slate-700 dark:text-[#F2F7F5] hover:bg-slate-50 dark:hover:bg-[#223640] transition-colors"
+            >
+              Review Completed Tasks
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Category breakdown visual cards */}

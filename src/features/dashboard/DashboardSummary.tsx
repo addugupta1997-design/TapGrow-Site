@@ -40,6 +40,11 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({
             {scoreResult.totalScore}
           </span>
           <span className="text-sm font-medium text-slate-400 dark:text-[#91A5A9] font-mono">/ 100</span>
+          {(scoreResult.confirmedBoost ?? 0) > 0 && (
+            <span className="inline-flex items-center text-[11px] font-bold text-emerald-700 dark:text-[#65D6B2] bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
+              +{scoreResult.confirmedBoost} confirmed
+            </span>
+          )}
         </div>
         <p className="mt-2 text-xs text-slate-500 dark:text-[#91A5A9] line-clamp-2 leading-relaxed">
           {scoreResult.interpretation}
