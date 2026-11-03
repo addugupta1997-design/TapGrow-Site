@@ -14,7 +14,7 @@ import { NotFoundPage } from './pages/NotFoundPage';
 import { ThemeProvider } from './lib/theme';
 import { deserializePlanFromHash } from './lib/sharePlan';
 
-type AppView = 'landing' | 'assessment' | 'dashboard' | 'how-it-works' | 'about' | 'privacy' | 'not-found';
+type AppView = 'landing' | 'assessment' | 'dashboard' | 'workspace' | 'seo' | 'how-it-works' | 'about' | 'privacy' | 'not-found';
 
 function getViewFromPath(pathname: string, hasPlan: boolean): AppView {
   const clean = pathname.replace(/\/$/, '') || '/';
@@ -24,6 +24,8 @@ function getViewFromPath(pathname: string, hasPlan: boolean): AppView {
   if (clean === '/privacy') return 'privacy';
   if (clean === '/assessment') return 'assessment';
   if (clean === '/dashboard') return 'dashboard';
+  if (clean === '/workspace') return hasPlan ? 'workspace' : 'landing';
+  if (clean === '/seo') return hasPlan ? 'seo' : 'landing';
   return 'not-found';
 }
 
@@ -41,6 +43,10 @@ function getPathFromView(view: AppView): string {
       return '/assessment';
     case 'dashboard':
       return '/dashboard';
+    case 'workspace':
+      return '/workspace';
+    case 'seo':
+      return '/seo';
     default:
       return '/';
   }
@@ -156,6 +162,26 @@ function AppContent() {
             onEditAssessment={() => navigateTo('assessment')}
             onClearPlanPrompt={() => setIsResetDialogOpen(true)}
             onPlanUpdated={(updated) => setPlan(updated)}
+          />
+        )}
+
+        {currentView === 'workspace' && plan && (
+          <DashboardPage
+            plan={plan}
+            onEditAssessment={() => navigateTo('assessment')}
+            onClearPlanPrompt={() => setIsResetDialogOpen(true)}
+            onPlanUpdated={(updated) => setPlan(updated)}
+            initialTab="workspace"
+          />
+        )}
+
+        {currentView === 'seo' && plan && (
+          <DashboardPage
+            plan={plan}
+            onEditAssessment={() => navigateTo('assessment')}
+            onClearPlanPrompt={() => setIsResetDialogOpen(true)}
+            onPlanUpdated={(updated) => setPlan(updated)}
+            initialTab="seo"
           />
         )}
 

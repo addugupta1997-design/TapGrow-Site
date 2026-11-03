@@ -1,5 +1,6 @@
 import { AssessmentAnswers } from './assessment';
 import { GeneratedTask, ScoreResult } from './recommendations';
+import { WeeklyPlannerState, WeeklyReviewReport } from './planner';
 
 export const CURRENT_STORAGE_SCHEMA_VERSION = 1;
 export const STORAGE_KEY = 'local_biz_growth_planner_data_v1';
@@ -23,4 +24,6 @@ export interface SavedPlanState {
   scoreResult: ScoreResult;
   tasks: GeneratedTask[];
   remindersSubscription?: ReminderSubscription;
+  weeklyPlannerState?: WeeklyPlannerState;
+  weeklyReviewHistory?: WeeklyReviewReport[];
 }

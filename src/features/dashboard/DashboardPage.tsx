@@ -15,6 +15,9 @@ import { updateTaskInStorage, savePlanToStorage } from '../../lib/storage';
 import { calculateReadinessScore } from '../recommendations/scoring';
 import { formatDate } from '../../locales/i18n';
 import { TapGrowSymbol } from '../../components/brand/TapGrowLogo';
+import { AIMarketingAdvisor } from '../advisor/AIMarketingAdvisor';
+import { MarketingWorkspace } from '../workspace/MarketingWorkspace';
+import { SeoCheckerTab } from '../seoChecker/SeoCheckerTab';
 import {
   Download,
   Printer,
@@ -36,6 +39,9 @@ import {
   Bell,
   MoreHorizontal,
   ChevronDown,
+  Bot,
+  Layers,
+  Globe,
 } from 'lucide-react';
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -54,6 +60,7 @@ interface DashboardPageProps {
   onEditAssessment: () => void;
   onClearPlanPrompt: () => void;
   onPlanUpdated: (updatedPlan: SavedPlanState) => void;
+  initialTab?: 'checklist' | 'weekly' | 'advisor' | 'workspace' | 'seo';
 }
 
 export const DashboardPage: React.FC<DashboardPageProps> = ({
@@ -61,14 +68,45 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   onEditAssessment,
   onClearPlanPrompt,
   onPlanUpdated,
+  initialTab,
 }) => {
-  const [activeTab, setActiveTab] = useState<'checklist' | 'weekly'>('checklist');
+  const [activeTab, setActiveTab] = useState<'checklist' | 'weekly' | 'advisor' | 'workspace' | 'seo'>(initialTab || 'checklist');
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>('all');
   const [isScoreExplainerOpen, setIsScoreExplainerOpen] = useState(false);
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
   const [isRemindersModalOpen, setIsRemindersModalOpen] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [isMobileActionsOpen, setIsMobileActionsOpen] = useState(false);
+
+  React.useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
+
+  const openAdvisorTab = () => {
+    setActiveTab('advisor');
+    const section = document.getElementById('tasks-view-section');
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const openWorkspaceTab = () => {
+    setActiveTab('workspace');
+    const section = document.getElementById('tasks-view-section');
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const openSeoTab = () => {
+    setActiveTab('seo');
+    const section = document.getElementById('tasks-view-section');
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   const handleSelectCategoryFromPulse = (category: string) => {
     setSelectedCategoryFilter(category);
@@ -244,6 +282,39 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                 <button
                   type="button"
                   onClick={() => {
+                    openSeoTab();
+                    setIsMobileActionsOpen(false);
+                  }}
+                  className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-[#16866F] dark:text-[#65D6B2] hover:bg-emerald-50 dark:hover:bg-[#223640]"
+                >
+                  <Globe className="h-3.5 w-3.5 text-[#16866F] dark:text-[#65D6B2]" />
+                  <span>Website & SEO Checker</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    openWorkspaceTab();
+                    setIsMobileActionsOpen(false);
+                  }}
+                  className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-slate-700 dark:text-[#F2F7F5] hover:bg-slate-50 dark:hover:bg-[#223640]"
+                >
+                  <Layers className="h-3.5 w-3.5 text-[#16866F] dark:text-[#65D6B2]" />
+                  <span>Marketing Workspace</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    openAdvisorTab();
+                    setIsMobileActionsOpen(false);
+                  }}
+                  className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-slate-700 dark:text-[#F2F7F5] hover:bg-slate-50 dark:hover:bg-[#223640]"
+                >
+                  <Bot className="h-3.5 w-3.5 text-[#16866F] dark:text-[#65D6B2]" />
+                  <span>AI Marketing Advisor</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
                     onEditAssessment();
                     setIsMobileActionsOpen(false);
                   }}
@@ -283,11 +354,44 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         <div className="hidden sm:flex items-center gap-2 flex-nowrap overflow-x-auto max-w-full py-0.5 scrollbar-none shrink-0">
           <button
             type="button"
-            onClick={onEditAssessment}
-            className="h-9 inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 rounded-lg border border-slate-200 dark:border-[#304650] bg-white dark:bg-[#1D3039] px-3.5 text-xs font-semibold text-slate-700 dark:text-[#F2F7F5] shadow-2xs hover:bg-slate-50 dark:hover:bg-[#223640] transition-colors focus:outline-none focus:ring-2 focus:ring-[#16866F]"
+            onClick={openSeoTab}
+            className={`h-9 inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 rounded-lg border px-3.5 text-xs font-semibold shadow-2xs transition-colors focus:outline-none focus:ring-2 focus:ring-[#16866F] ${
+              activeTab === 'seo'
+                ? 'border-[#16866F] bg-[#16866F] text-white'
+                : 'border-slate-200 dark:border-[#304650] bg-white dark:bg-[#1D3039] text-slate-700 dark:text-[#F2F7F5] hover:bg-slate-50 dark:hover:bg-[#223640]'
+            }`}
+            title="Open Website & SEO Checker"
           >
-            <Edit3 className="h-3.5 w-3.5 text-slate-500 dark:text-[#91A5A9]" />
-            <span>Edit Answers</span>
+            <Globe className="h-3.5 w-3.5 text-[#16866F] dark:text-[#65D6B2]" />
+            <span>SEO Checker</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={openWorkspaceTab}
+            className={`h-9 inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 rounded-lg border px-3.5 text-xs font-semibold shadow-2xs transition-colors focus:outline-none focus:ring-2 focus:ring-[#16866F] ${
+              activeTab === 'workspace'
+                ? 'border-[#16866F] bg-[#16866F] text-white'
+                : 'border-slate-200 dark:border-[#304650] bg-white dark:bg-[#1D3039] text-slate-700 dark:text-[#F2F7F5] hover:bg-slate-50 dark:hover:bg-[#223640]'
+            }`}
+            title="Open Central Marketing Workspace"
+          >
+            <Layers className="h-3.5 w-3.5 text-[#16866F] dark:text-[#65D6B2]" />
+            <span>Workspace</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={openAdvisorTab}
+            className={`h-9 inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 rounded-lg border px-3.5 text-xs font-semibold shadow-2xs transition-colors focus:outline-none focus:ring-2 focus:ring-[#16866F] ${
+              activeTab === 'advisor'
+                ? 'border-[#16866F] bg-[#16866F] text-white'
+                : 'border-emerald-200/80 dark:border-[#304650] bg-[#E0F5EE]/60 dark:bg-[#16866F]/20 text-[#0F5C4D] dark:text-[#65D6B2] hover:bg-[#D4EFE6] dark:hover:bg-[#16866F]/30'
+            }`}
+            title="Open AI Marketing Advisor"
+          >
+            <Bot className="h-3.5 w-3.5" />
+            <span>AI Advisor</span>
           </button>
 
           <button
@@ -559,11 +663,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
       </div>
 
       {/* View Switcher Tabs */}
-      <div id="tasks-view-section" className="no-print flex items-center gap-2 border-b border-slate-200 dark:border-[#304650] pb-2 transition-colors duration-150">
+      <div id="tasks-view-section" className="no-print flex flex-wrap items-center gap-2 border-b border-slate-200 dark:border-[#304650] pb-2 transition-colors duration-150">
         <button
           type="button"
           onClick={() => setActiveTab('checklist')}
-          className={`flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
+          className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
             activeTab === 'checklist'
               ? 'bg-[#16866F] text-white shadow-2xs'
               : 'text-slate-600 dark:text-[#B5C5C7] hover:text-slate-900 dark:hover:text-[#F2F7F5] hover:bg-slate-100 dark:hover:bg-[#223640]'
@@ -575,7 +679,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         <button
           type="button"
           onClick={() => setActiveTab('weekly')}
-          className={`flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
+          className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
             activeTab === 'weekly'
               ? 'bg-[#16866F] text-white shadow-2xs'
               : 'text-slate-600 dark:text-[#B5C5C7] hover:text-slate-900 dark:hover:text-[#F2F7F5] hover:bg-slate-100 dark:hover:bg-[#223640]'
@@ -583,6 +687,47 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         >
           <Calendar className="h-4 w-4" />
           Weekly Focus Sequence
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('advisor')}
+          className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
+            activeTab === 'advisor'
+              ? 'bg-[#16866F] text-white shadow-2xs'
+              : 'text-slate-600 dark:text-[#B5C5C7] hover:text-slate-900 dark:hover:text-[#F2F7F5] hover:bg-slate-100 dark:hover:bg-[#223640]'
+          }`}
+        >
+          <Bot className="h-4 w-4 text-[#16866F] dark:text-[#65D6B2]" />
+          <span>AI Marketing Advisor</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('workspace')}
+          className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
+            activeTab === 'workspace'
+              ? 'bg-[#16866F] text-white shadow-2xs'
+              : 'text-slate-600 dark:text-[#B5C5C7] hover:text-slate-900 dark:hover:text-[#F2F7F5] hover:bg-slate-100 dark:hover:bg-[#223640]'
+          }`}
+        >
+          <Layers className="h-4 w-4 text-[#16866F] dark:text-[#65D6B2]" />
+          <span>Marketing Workspace</span>
+          <span className="inline-flex items-center rounded-full bg-[#E0F5EE] dark:bg-[#16866F]/40 px-1.5 py-0.2 text-[10px] font-bold text-[#16866F] dark:text-[#65D6B2]">
+            Hub
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('seo')}
+          className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
+            activeTab === 'seo'
+              ? 'bg-[#16866F] text-white shadow-2xs'
+              : 'text-slate-600 dark:text-[#B5C5C7] hover:text-slate-900 dark:hover:text-[#F2F7F5] hover:bg-slate-100 dark:hover:bg-[#223640]'
+          }`}
+        >
+          <Globe className="h-4 w-4 text-[#16866F] dark:text-[#65D6B2]" />
+          <span>Website & SEO Checker</span>
         </button>
       </div>
 
@@ -595,12 +740,18 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           activeCategoryFilter={selectedCategoryFilter}
           onCategoryFilterChange={setSelectedCategoryFilter}
         />
-      ) : (
+      ) : activeTab === 'weekly' ? (
         <WeeklyFocusView
           tasks={plan.tasks}
           onStatusChange={handleStatusChange}
           onSaveNote={handleSaveNote}
         />
+      ) : activeTab === 'advisor' ? (
+        <AIMarketingAdvisor answers={plan.answers} />
+      ) : activeTab === 'workspace' ? (
+        <MarketingWorkspace answers={plan.answers} />
+      ) : (
+        <SeoCheckerTab answers={plan.answers} />
       )}
 
       {/* Score Breakdown Modal */}
