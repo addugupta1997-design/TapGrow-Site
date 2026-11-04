@@ -167,32 +167,73 @@ function AppContent() {
               onPlanUpdated={(updated) => setPlan(updated)}
             />
           ) : (
-            <div className="mx-auto max-w-2xl px-4 py-16 sm:py-24 text-center sm:px-6">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E0F5EE] dark:bg-[#16866F]/20 text-[#16866F] dark:text-[#65D6B2] shadow-xs mb-5">
-                <Target className="h-7 w-7" />
+            <div className="mx-auto max-w-2xl px-4 py-12 sm:py-16 text-center sm:px-6 animate-in fade-in">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E0F5EE] dark:bg-[#16866F]/20 text-[#16866F] dark:text-[#65D6B2] shadow-xs mb-4">
+                <Sparkles className="h-7 w-7" />
               </div>
-              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-[#F2F7F5]">
-                No Saved Growth Plan Found
-              </h2>
-              <p className="mt-2.5 text-sm text-slate-600 dark:text-[#B5C5C7] leading-relaxed max-w-md mx-auto">
-                You have not completed an assessment yet on this device. Complete our quick, 3-minute assessment to unlock your personalized readiness score, tailored action checklist, and weekly marketing roadmap.
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-[#F2F7F5]">
+                Welcome to TapGrow
+              </h1>
+              <p className="mt-2 text-sm text-slate-600 dark:text-[#B5C5C7] leading-relaxed max-w-lg mx-auto">
+                Your simple, friendly business growth assistant. Get a clear, step-by-step plan to attract more local customers.
               </p>
+
+              {/* 3 Simple Steps */}
+              <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
+                <div className="rounded-xl border border-slate-200 dark:border-[#304650] bg-white dark:bg-[#1D3039] p-4 shadow-2xs space-y-2">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#16866F] text-xs font-bold text-white">
+                    1
+                  </span>
+                  <h3 className="text-xs font-bold text-slate-900 dark:text-[#F2F7F5]">
+                    Tell us about your business
+                  </h3>
+                  <p className="text-[11px] text-slate-500 dark:text-[#91A5A9] leading-relaxed">
+                    Answer a few quick questions in under 3 minutes.
+                  </p>
+                </div>
+
+                <div className="rounded-xl border border-slate-200 dark:border-[#304650] bg-white dark:bg-[#1D3039] p-4 shadow-2xs space-y-2">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#16866F] text-xs font-bold text-white">
+                    2
+                  </span>
+                  <h3 className="text-xs font-bold text-slate-900 dark:text-[#F2F7F5]">
+                    Discover what needs improvement
+                  </h3>
+                  <p className="text-[11px] text-slate-500 dark:text-[#91A5A9] leading-relaxed">
+                    Find missing foundations and easy quick wins.
+                  </p>
+                </div>
+
+                <div className="rounded-xl border border-slate-200 dark:border-[#304650] bg-white dark:bg-[#1D3039] p-4 shadow-2xs space-y-2">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#16866F] text-xs font-bold text-white">
+                    3
+                  </span>
+                  <h3 className="text-xs font-bold text-slate-900 dark:text-[#F2F7F5]">
+                    Follow your action plan
+                  </h3>
+                  <p className="text-[11px] text-slate-500 dark:text-[#91A5A9] leading-relaxed">
+                    Complete one simple action at a time at your own pace.
+                  </p>
+                </div>
+              </div>
+
+              {/* Primary & Secondary Action Buttons */}
               <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
                 <button
                   type="button"
                   onClick={() => navigateTo('assessment')}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-[#16866F] px-5 py-2.5 text-xs font-semibold text-white shadow-2xs hover:bg-[#0F5C4D] dark:hover:bg-[#1A9B80] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#16866F]"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-[#16866F] px-6 py-3 text-xs font-bold text-white shadow-xs hover:bg-[#0F5C4D] dark:hover:bg-[#1A9B80] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#16866F]"
                 >
-                  <span>Start Free Assessment</span>
+                  <span>Create My Free Business Plan</span>
                   <ArrowUpRight className="h-4 w-4" />
                 </button>
                 <button
                   type="button"
                   onClick={() => navigateTo('seo')}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 dark:border-[#304650] bg-white dark:bg-[#1D3039] px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-[#F2F7F5] shadow-2xs hover:bg-slate-50 dark:hover:bg-[#223640] transition-colors"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 dark:border-[#304650] bg-white dark:bg-[#1D3039] px-5 py-3 text-xs font-semibold text-slate-700 dark:text-[#F2F7F5] shadow-2xs hover:bg-slate-50 dark:hover:bg-[#223640] transition-colors"
                 >
                   <Globe className="h-4 w-4 text-[#16866F] dark:text-[#65D6B2]" />
-                  <span>Try Website & SEO Checker</span>
+                  <span>Check My Website Directly</span>
                 </button>
               </div>
             </div>
