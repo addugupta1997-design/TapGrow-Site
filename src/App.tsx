@@ -13,8 +13,10 @@ import { PrivacyPage } from './pages/PrivacyPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { ThemeProvider } from './lib/theme';
 import { deserializePlanFromHash } from './lib/sharePlan';
+import { SeoCheckerTab } from './features/seoChecker/SeoCheckerTab';
+import { Globe, ArrowUpRight, Target, Sparkles, CheckCircle2 } from 'lucide-react';
 
-type AppView = 'landing' | 'assessment' | 'dashboard' | 'workspace' | 'seo' | 'competitors' | 'how-it-works' | 'about' | 'privacy' | 'not-found';
+type AppView = 'landing' | 'assessment' | 'dashboard' | 'workspace' | 'seo' | 'how-it-works' | 'about' | 'privacy' | 'not-found';
 
 function getViewFromPath(pathname: string, hasPlan: boolean): AppView {
   const clean = pathname.replace(/\/$/, '') || '/';
@@ -25,8 +27,7 @@ function getViewFromPath(pathname: string, hasPlan: boolean): AppView {
   if (clean === '/assessment') return 'assessment';
   if (clean === '/dashboard') return 'dashboard';
   if (clean === '/workspace') return hasPlan ? 'workspace' : 'landing';
-  if (clean === '/seo') return hasPlan ? 'seo' : 'landing';
-  if (clean === '/competitors') return hasPlan ? 'competitors' : 'landing';
+  if (clean === '/seo') return 'seo';
   return 'not-found';
 }
 
@@ -48,8 +49,6 @@ function getPathFromView(view: AppView): string {
       return '/workspace';
     case 'seo':
       return '/seo';
-    case 'competitors':
-      return '/competitors';
     default:
       return '/';
   }
@@ -159,13 +158,45 @@ function AppContent() {
           />
         )}
 
-        {currentView === 'dashboard' && plan && (
-          <DashboardPage
-            plan={plan}
-            onEditAssessment={() => navigateTo('assessment')}
-            onClearPlanPrompt={() => setIsResetDialogOpen(true)}
-            onPlanUpdated={(updated) => setPlan(updated)}
-          />
+        {currentView === 'dashboard' && (
+          plan ? (
+            <DashboardPage
+              plan={plan}
+              onEditAssessment={() => navigateTo('assessment')}
+              onClearPlanPrompt={() => setIsResetDialogOpen(true)}
+              onPlanUpdated={(updated) => setPlan(updated)}
+            />
+          ) : (
+            <div className="mx-auto max-w-2xl px-4 py-16 sm:py-24 text-center sm:px-6">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E0F5EE] dark:bg-[#16866F]/20 text-[#16866F] dark:text-[#65D6B2] shadow-xs mb-5">
+                <Target className="h-7 w-7" />
+              </div>
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-[#F2F7F5]">
+                No Saved Growth Plan Found
+              </h2>
+              <p className="mt-2.5 text-sm text-slate-600 dark:text-[#B5C5C7] leading-relaxed max-w-md mx-auto">
+                You have not completed an assessment yet on this device. Complete our quick, 3-minute assessment to unlock your personalized readiness score, tailored action checklist, and weekly marketing roadmap.
+              </p>
+              <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => navigateTo('assessment')}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-[#16866F] px-5 py-2.5 text-xs font-semibold text-white shadow-2xs hover:bg-[#0F5C4D] dark:hover:bg-[#1A9B80] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#16866F]"
+                >
+                  <span>Start Free Assessment</span>
+                  <ArrowUpRight className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigateTo('seo')}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 dark:border-[#304650] bg-white dark:bg-[#1D3039] px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-[#F2F7F5] shadow-2xs hover:bg-slate-50 dark:hover:bg-[#223640] transition-colors"
+                >
+                  <Globe className="h-4 w-4 text-[#16866F] dark:text-[#65D6B2]" />
+                  <span>Try Website & SEO Checker</span>
+                </button>
+              </div>
+            </div>
+          )
         )}
 
         {currentView === 'workspace' && plan && (
@@ -178,24 +209,45 @@ function AppContent() {
           />
         )}
 
-        {currentView === 'seo' && plan && (
-          <DashboardPage
-            plan={plan}
-            onEditAssessment={() => navigateTo('assessment')}
-            onClearPlanPrompt={() => setIsResetDialogOpen(true)}
-            onPlanUpdated={(updated) => setPlan(updated)}
-            initialTab="seo"
-          />
-        )}
+        {currentView === 'seo' && (
+          plan ? (
+            <DashboardPage
+              plan={plan}
+              onEditAssessment={() => navigateTo('assessment')}
+              onClearPlanPrompt={() => setIsResetDialogOpen(true)}
+              onPlanUpdated={(updated) => setPlan(updated)}
+              initialTab="seo"
+            />
+          ) : (
+            <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 space-y-6">
+              {/* Standalone SEO Checker Header */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-xl border border-slate-200 dark:border-[#304650] bg-white dark:bg-[#1D3039] p-5 shadow-2xs">
+                <div>
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-[#E0F5EE] dark:bg-[#16866F]/20 px-2.5 py-0.5 text-xs font-bold text-[#16866F] dark:text-[#65D6B2] mb-1.5">
+                    <Globe className="h-3.5 w-3.5" />
+                    <span>Free Technical Website Audit</span>
+                  </div>
+                  <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-[#F2F7F5]">
+                    Website & SEO Checker
+                  </h1>
+                  <p className="mt-1 text-xs sm:text-sm text-slate-600 dark:text-[#B5C5C7]">
+                    Audit any local business website for technical SEO, mobile readiness, LocalBusiness Schema, and conversion factors.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigateTo('assessment')}
+                  className="inline-flex items-center gap-1.5 self-start sm:self-auto rounded-lg border border-[#16866F]/40 bg-[#E0F5EE]/40 dark:bg-[#16866F]/15 px-3.5 py-2 text-xs font-semibold text-[#16866F] dark:text-[#65D6B2] hover:bg-[#E0F5EE] dark:hover:bg-[#16866F]/25 transition-colors whitespace-nowrap"
+                >
+                  <span>Build Full Marketing Plan</span>
+                  <ArrowUpRight className="h-3.5 w-3.5" />
+                </button>
+              </div>
 
-        {currentView === 'competitors' && plan && (
-          <DashboardPage
-            plan={plan}
-            onEditAssessment={() => navigateTo('assessment')}
-            onClearPlanPrompt={() => setIsResetDialogOpen(true)}
-            onPlanUpdated={(updated) => setPlan(updated)}
-            initialTab="competitors"
-          />
+              {/* Directly Accessible SEO Checker Tool */}
+              <SeoCheckerTab />
+            </div>
+          )
         )}
 
         {currentView === 'how-it-works' && (

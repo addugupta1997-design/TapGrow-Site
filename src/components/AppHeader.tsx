@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { ArrowUpRight, CheckCircle2, Menu, X, Compass, HelpCircle, Info, ShieldCheck, FileText, Layers, Globe, Users } from 'lucide-react';
+import { ArrowUpRight, CheckCircle2, Menu, X, Compass, HelpCircle, Info, ShieldCheck, Layers, Globe } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 import { TapGrowLogo } from './brand/TapGrowLogo';
 
 interface AppHeaderProps {
-  currentView: 'landing' | 'assessment' | 'dashboard' | 'workspace' | 'seo' | 'competitors' | 'how-it-works' | 'about' | 'privacy';
-  onNavigate: (view: 'landing' | 'assessment' | 'dashboard' | 'workspace' | 'seo' | 'competitors' | 'how-it-works' | 'about' | 'privacy') => void;
+  currentView: 'landing' | 'assessment' | 'dashboard' | 'workspace' | 'seo' | 'how-it-works' | 'about' | 'privacy';
+  onNavigate: (view: 'landing' | 'assessment' | 'dashboard' | 'workspace' | 'seo' | 'how-it-works' | 'about' | 'privacy') => void;
   hasExistingPlan: boolean;
   onClearPlanPrompt?: () => void;
 }
@@ -17,7 +17,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const handleNavClick = (view: 'landing' | 'assessment' | 'dashboard' | 'workspace' | 'seo' | 'competitors' | 'how-it-works' | 'about' | 'privacy') => {
+  const handleNavClick = (view: 'landing' | 'assessment' | 'dashboard' | 'workspace' | 'seo' | 'how-it-works' | 'about' | 'privacy') => {
     onNavigate(view);
     setMobileMenuOpen(false);
   };
@@ -37,7 +37,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
 
         {/* Zone 2: Desktop Navigation Links */}
         <nav
-          className="hidden md:flex items-center gap-7 text-sm font-medium text-slate-600 dark:text-[#B5C5C7]"
+          className="hidden md:flex items-center gap-6 lg:gap-7 text-sm font-medium text-slate-600 dark:text-[#B5C5C7]"
           aria-label="Main Navigation"
         >
           <button
@@ -98,54 +98,34 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                 <Layers className="h-4 w-4 text-[#16866F] dark:text-[#65D6B2]" />
                 <span>Workspace</span>
               </button>
-              <button
-                type="button"
-                onClick={() => handleNavClick('seo')}
-                className={`flex items-center gap-1.5 transition-colors hover:text-slate-900 dark:hover:text-[#F2F7F5] whitespace-nowrap ${
-                  currentView === 'seo' ? 'font-semibold text-[#16866F] dark:text-[#65D6B2]' : ''
-                }`}
-              >
-                <Globe className="h-4 w-4 text-[#16866F] dark:text-[#65D6B2]" />
-                <span>SEO Checker</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleNavClick('competitors')}
-                className={`flex items-center gap-1.5 transition-colors hover:text-slate-900 dark:hover:text-[#F2F7F5] whitespace-nowrap ${
-                  currentView === 'competitors' ? 'font-semibold text-[#16866F] dark:text-[#65D6B2]' : ''
-                }`}
-              >
-                <Users className="h-4 w-4 text-[#16866F] dark:text-[#65D6B2]" />
-                <span>Competitors</span>
-              </button>
             </>
           )}
+          {/* SEO Checker is a permanent, directly accessible item for all users */}
+          <button
+            type="button"
+            onClick={() => handleNavClick('seo')}
+            className={`flex items-center gap-1.5 transition-colors hover:text-slate-900 dark:hover:text-[#F2F7F5] whitespace-nowrap ${
+              currentView === 'seo' ? 'font-semibold text-[#16866F] dark:text-[#65D6B2]' : ''
+            }`}
+          >
+            <Globe className="h-4 w-4 text-[#16866F] dark:text-[#65D6B2]" />
+            <span>SEO Checker</span>
+          </button>
         </nav>
 
-        {/* Zone 3: Actions (Theme Toggle & CTA & Mobile Menu Toggle) */}
+        {/* Zone 3: Actions (Theme Toggle & View My Plan Button & Mobile Menu Toggle) */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           {/* Global Theme Toggle */}
           <ThemeToggle />
 
-          {hasExistingPlan ? (
-            <button
-              type="button"
-              onClick={() => handleNavClick(currentView === 'dashboard' || currentView === 'workspace' ? 'assessment' : 'dashboard')}
-              className="h-9 inline-flex items-center justify-center rounded-lg bg-[#16866F] px-3.5 text-xs font-semibold text-white shadow-xs transition-all hover:bg-[#0F5C4D] dark:hover:bg-[#1A9B80] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#16866F] whitespace-nowrap"
-            >
-              {currentView === 'dashboard' || currentView === 'workspace' ? 'Edit Assessment' : 'View My Plan'}
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => handleNavClick('assessment')}
-              className="h-9 inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#16866F] px-3.5 text-xs font-semibold text-white shadow-xs transition-all hover:bg-[#0F5C4D] dark:hover:bg-[#1A9B80] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#16866F] whitespace-nowrap"
-            >
-              <span className="hidden sm:inline">Start Free Assessment</span>
-              <span className="sm:hidden">Start Plan</span>
-              <ArrowUpRight className="h-3.5 w-3.5" />
-            </button>
-          )}
+          {/* Direct "View My Plan" button */}
+          <button
+            type="button"
+            onClick={() => handleNavClick('dashboard')}
+            className="h-9 inline-flex items-center justify-center rounded-lg bg-[#16866F] px-3.5 text-xs font-semibold text-white shadow-xs transition-all hover:bg-[#0F5C4D] dark:hover:bg-[#1A9B80] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#16866F] whitespace-nowrap"
+          >
+            View My Plan
+          </button>
 
           {/* Mobile Menu Toggle Button */}
           <button
@@ -216,6 +196,20 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               <span>Privacy & Storage</span>
             </button>
 
+            {/* Permanent SEO Checker on mobile */}
+            <button
+              type="button"
+              onClick={() => handleNavClick('seo')}
+              className={`flex items-center gap-3 w-full rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-colors ${
+                currentView === 'seo'
+                  ? 'bg-[#E0F5EE] dark:bg-[#16866F]/20 text-[#16866F] dark:text-[#65D6B2] font-semibold'
+                  : 'text-slate-700 dark:text-[#B5C5C7] hover:bg-slate-100 dark:hover:bg-[#1D3039]'
+              }`}
+            >
+              <Globe className="h-4 w-4 text-[#16866F] dark:text-[#65D6B2]" />
+              <span>Website & SEO Checker</span>
+            </button>
+
             {hasExistingPlan && (
               <>
                 <button
@@ -242,32 +236,18 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                   <Layers className="h-4 w-4 text-[#16866F] dark:text-[#65D6B2]" />
                   <span>Marketing Workspace</span>
                 </button>
-                <button
-                  type="button"
-                  onClick={() => handleNavClick('seo')}
-                  className={`flex items-center gap-3 w-full rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-colors ${
-                    currentView === 'seo'
-                      ? 'bg-[#E0F5EE] dark:bg-[#16866F]/20 text-[#16866F] dark:text-[#65D6B2] font-semibold'
-                      : 'text-slate-700 dark:text-[#B5C5C7] hover:bg-slate-100 dark:hover:bg-[#1D3039]'
-                  }`}
-                >
-                  <Globe className="h-4 w-4 text-[#16866F] dark:text-[#65D6B2]" />
-                  <span>Website & SEO Checker</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleNavClick('competitors')}
-                  className={`flex items-center gap-3 w-full rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-colors ${
-                    currentView === 'competitors'
-                      ? 'bg-[#E0F5EE] dark:bg-[#16866F]/20 text-[#16866F] dark:text-[#65D6B2] font-semibold'
-                      : 'text-slate-700 dark:text-[#B5C5C7] hover:bg-slate-100 dark:hover:bg-[#1D3039]'
-                  }`}
-                >
-                  <Users className="h-4 w-4 text-[#16866F] dark:text-[#65D6B2]" />
-                  <span>Competitor Intelligence</span>
-                </button>
               </>
             )}
+
+            <div className="pt-2 border-t border-slate-200/80 dark:border-[#304650]">
+              <button
+                type="button"
+                onClick={() => handleNavClick('dashboard')}
+                className="w-full h-9 inline-flex items-center justify-center rounded-lg bg-[#16866F] px-3.5 text-xs font-semibold text-white shadow-xs transition-all hover:bg-[#0F5C4D] dark:hover:bg-[#1A9B80] whitespace-nowrap"
+              >
+                View My Plan
+              </button>
+            </div>
           </nav>
         </div>
       )}
