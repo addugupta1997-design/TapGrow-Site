@@ -240,6 +240,11 @@ export async function safeFetchHtml(
     responseHeaders[key.toLowerCase()] = val;
   });
 
+  const cType = (responseHeaders['content-type'] || '').toLowerCase();
+  if (cType && (cType.includes('image/') || cType.includes('video/') || cType.includes('audio/') || cType.includes('application/pdf') || cType.includes('application/octet-stream') || cType.includes('application/zip'))) {
+    throw new Error(`The website returned a non-HTML file (${cType}). Only HTML websites can be audited.`);
+  }
+
   // Read body with size cutoff
   const reader = response.body?.getReader();
   let receivedBytes = 0;

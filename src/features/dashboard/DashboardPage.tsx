@@ -18,6 +18,7 @@ import { TapGrowSymbol } from '../../components/brand/TapGrowLogo';
 import { AIMarketingAdvisor } from '../advisor/AIMarketingAdvisor';
 import { MarketingWorkspace } from '../workspace/MarketingWorkspace';
 import { SeoCheckerTab } from '../seoChecker/SeoCheckerTab';
+import { CompetitorIntelligenceTab } from '../competitors/CompetitorIntelligenceTab';
 import {
   Download,
   Printer,
@@ -42,6 +43,7 @@ import {
   Bot,
   Layers,
   Globe,
+  Users,
 } from 'lucide-react';
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -60,7 +62,7 @@ interface DashboardPageProps {
   onEditAssessment: () => void;
   onClearPlanPrompt: () => void;
   onPlanUpdated: (updatedPlan: SavedPlanState) => void;
-  initialTab?: 'checklist' | 'weekly' | 'advisor' | 'workspace' | 'seo';
+  initialTab?: 'checklist' | 'weekly' | 'advisor' | 'workspace' | 'seo' | 'competitors';
 }
 
 export const DashboardPage: React.FC<DashboardPageProps> = ({
@@ -70,7 +72,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   onPlanUpdated,
   initialTab,
 }) => {
-  const [activeTab, setActiveTab] = useState<'checklist' | 'weekly' | 'advisor' | 'workspace' | 'seo'>(initialTab || 'checklist');
+  const [activeTab, setActiveTab] = useState<'checklist' | 'weekly' | 'advisor' | 'workspace' | 'seo' | 'competitors'>(initialTab || 'checklist');
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>('all');
   const [isScoreExplainerOpen, setIsScoreExplainerOpen] = useState(false);
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
@@ -102,6 +104,14 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
   const openSeoTab = () => {
     setActiveTab('seo');
+    const section = document.getElementById('tasks-view-section');
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const openCompetitorsTab = () => {
+    setActiveTab('competitors');
     const section = document.getElementById('tasks-view-section');
     if (section) {
       section.scrollIntoView({ behavior: 'smooth' });
@@ -282,6 +292,17 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                 <button
                   type="button"
                   onClick={() => {
+                    openCompetitorsTab();
+                    setIsMobileActionsOpen(false);
+                  }}
+                  className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-slate-700 dark:text-[#F2F7F5] hover:bg-slate-50 dark:hover:bg-[#223640]"
+                >
+                  <Users className="h-3.5 w-3.5 text-[#16866F] dark:text-[#65D6B2]" />
+                  <span>Competitor Intelligence</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
                     openSeoTab();
                     setIsMobileActionsOpen(false);
                   }}
@@ -352,6 +373,20 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
         {/* Desktop & Tablet Toolbar (640px+): Aligned in a straight line */}
         <div className="hidden sm:flex items-center gap-2 flex-nowrap overflow-x-auto max-w-full py-0.5 scrollbar-none shrink-0">
+          <button
+            type="button"
+            onClick={openCompetitorsTab}
+            className={`h-9 inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 rounded-lg border px-3.5 text-xs font-semibold shadow-2xs transition-colors focus:outline-none focus:ring-2 focus:ring-[#16866F] ${
+              activeTab === 'competitors'
+                ? 'border-[#16866F] bg-[#16866F] text-white'
+                : 'border-slate-200 dark:border-[#304650] bg-white dark:bg-[#1D3039] text-slate-700 dark:text-[#F2F7F5] hover:bg-slate-50 dark:hover:bg-[#223640]'
+            }`}
+            title="Open Competitor Intelligence"
+          >
+            <Users className="h-3.5 w-3.5 text-[#16866F] dark:text-[#65D6B2]" />
+            <span>Competitors</span>
+          </button>
+
           <button
             type="button"
             onClick={openSeoTab}
@@ -729,6 +764,19 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           <Globe className="h-4 w-4 text-[#16866F] dark:text-[#65D6B2]" />
           <span>Website & SEO Checker</span>
         </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('competitors')}
+          className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
+            activeTab === 'competitors'
+              ? 'bg-[#16866F] text-white shadow-2xs'
+              : 'text-slate-600 dark:text-[#B5C5C7] hover:text-slate-900 dark:hover:text-[#F2F7F5] hover:bg-slate-100 dark:hover:bg-[#223640]'
+          }`}
+        >
+          <Users className="h-4 w-4 text-[#16866F] dark:text-[#65D6B2]" />
+          <span>Competitor Intelligence</span>
+        </button>
       </div>
 
       {/* Content View */}
@@ -750,8 +798,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         <AIMarketingAdvisor answers={plan.answers} />
       ) : activeTab === 'workspace' ? (
         <MarketingWorkspace answers={plan.answers} />
-      ) : (
+      ) : activeTab === 'seo' ? (
         <SeoCheckerTab answers={plan.answers} />
+      ) : (
+        <CompetitorIntelligenceTab answers={plan.answers} />
       )}
 
       {/* Score Breakdown Modal */}

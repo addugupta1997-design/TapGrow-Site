@@ -8,7 +8,28 @@ import { generateSeoPdfReport } from './generateSeoPdf';
 import { SAMPLE_WEBSITES, getSampleAuditReport } from './sampleAudits';
 import { RawScrapeResult } from '../../../server/seoScraper';
 
+import { formatAuditErrorMessage } from './errorFormatter';
+
 describe('Website & SEO Checker Unit Tests', () => {
+  describe('Error Formatter & Serialization Defense', () => {
+    it('never returns [object Object] for arbitrary objects', () => {
+      assert.notStrictEqual(formatAuditErrorMessage({}), '[object Object]');
+      assert.notStrictEqual(formatAuditErrorMessage({ error: {} }), '[object Object]');
+      assert.notStrictEqual(formatAuditErrorMessage(new Error({} as any)), '[object Object]');
+      assert.notStrictEqual(formatAuditErrorMessage('[object Object]'), '[object Object]');
+    });
+
+    it('extracts nested messages accurately', () => {
+      const res1 = formatAuditErrorMessage({ error: 'DNS resolution failure' });
+      assert.ok(res1.includes('website domain') || res1.includes('DNS'));
+
+      const res2 = formatAuditErrorMessage({ error: { message: 'Timed out' } });
+      assert.ok(res2.includes('too long to respond') || res2.includes('Timed out'));
+
+      const res3 = formatAuditErrorMessage({ message: 'Failed to fetch' });
+      assert.ok(res3.includes('Could not connect'));
+    });
+  });
   describe('SSRF Protection & IP Verification', () => {
     it('blocks localhost and loopback addresses', () => {
       assert.strictEqual(isPrivateOrReservedIp('127.0.0.1'), true);

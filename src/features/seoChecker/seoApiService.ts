@@ -1,6 +1,7 @@
 import { RawScrapeResult } from '../../../server/seoScraper';
 import { SeoAuditReport } from '../../types/seoChecker';
 import { evaluateWebsiteAudit } from './auditEngine';
+import { formatAuditErrorMessage } from './errorFormatter';
 
 export interface RunAuditParams {
   url: string;
@@ -28,7 +29,7 @@ export function normalizeWebsiteUrl(rawUrl: string): string {
 export async function runWebsiteAudit(params: RunAuditParams): Promise<SeoAuditReport> {
   const normalizedUrl = normalizeWebsiteUrl(params.url);
   if (!normalizedUrl) {
-    throw new Error('Please enter a website URL to audit.');
+    throw new Error('Please enter a valid website address (e.g. example.com).');
   }
 
   // Validate basic URL syntax
@@ -38,30 +39,59 @@ export async function runWebsiteAudit(params: RunAuditParams): Promise<SeoAuditR
       throw new Error('Please enter a valid domain name (e.g., example.com).');
     }
   } catch (err: any) {
-    throw new Error(err.message || 'Invalid URL address provided.');
+    throw new Error(formatAuditErrorMessage(err.message || 'Invalid website address provided.'));
   }
 
-  const response = await fetch('/api/audit/website', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    },
-    body: JSON.stringify({
-      url: normalizedUrl,
-      businessName: params.businessName,
-      cityArea: params.cityArea,
-      category: params.category,
-    }),
-  });
+  let response: Response;
+  try {
+    response = await fetch('/api/audit/website', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        url: normalizedUrl,
+        businessName: params.businessName,
+        cityArea: params.cityArea,
+        category: params.category,
+      }),
+    });
+  } catch (fetchErr: any) {
+    console.error('Audit network request error:', fetchErr);
+    throw new Error(formatAuditErrorMessage(fetchErr));
+  }
 
-  const data = await response.json();
+  // Safely parse response body whether JSON or HTML
+  const contentType = response.headers.get('content-type') || '';
+  let responseData: any = null;
+
+  if (contentType.includes('application/json')) {
+    try {
+      responseData = await response.json();
+    } catch (parseErr) {
+      console.warn('Failed to parse audit JSON response:', parseErr);
+    }
+  } else {
+    // If server returned plain text or HTML (e.g. 502/504 gateway error)
+    const textBody = await response.text().catch(() => '');
+    if (!response.ok) {
+      const summary = textBody.slice(0, 300);
+      throw new Error(formatAuditErrorMessage(`HTTP ${response.status}: ${summary || response.statusText || 'Audit service error'}`));
+    }
+  }
 
   if (!response.ok) {
-    throw new Error(data.error || 'Failed to complete website audit.');
+    const rawError = responseData?.error || responseData?.message || responseData?.details || `HTTP error ${response.status}`;
+    const formattedError = formatAuditErrorMessage(rawError);
+    throw new Error(formattedError);
   }
 
-  const scrapeResult: RawScrapeResult = data.scrapeResult;
+  if (!responseData || !responseData.scrapeResult) {
+    throw new Error('The audit service did not return valid website crawl data.');
+  }
+
+  const scrapeResult: RawScrapeResult = responseData.scrapeResult;
 
   // Run audit engine with user profile answers
   return evaluateWebsiteAudit({

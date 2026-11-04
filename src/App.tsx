@@ -14,7 +14,7 @@ import { NotFoundPage } from './pages/NotFoundPage';
 import { ThemeProvider } from './lib/theme';
 import { deserializePlanFromHash } from './lib/sharePlan';
 
-type AppView = 'landing' | 'assessment' | 'dashboard' | 'workspace' | 'seo' | 'how-it-works' | 'about' | 'privacy' | 'not-found';
+type AppView = 'landing' | 'assessment' | 'dashboard' | 'workspace' | 'seo' | 'competitors' | 'how-it-works' | 'about' | 'privacy' | 'not-found';
 
 function getViewFromPath(pathname: string, hasPlan: boolean): AppView {
   const clean = pathname.replace(/\/$/, '') || '/';
@@ -26,6 +26,7 @@ function getViewFromPath(pathname: string, hasPlan: boolean): AppView {
   if (clean === '/dashboard') return 'dashboard';
   if (clean === '/workspace') return hasPlan ? 'workspace' : 'landing';
   if (clean === '/seo') return hasPlan ? 'seo' : 'landing';
+  if (clean === '/competitors') return hasPlan ? 'competitors' : 'landing';
   return 'not-found';
 }
 
@@ -47,6 +48,8 @@ function getPathFromView(view: AppView): string {
       return '/workspace';
     case 'seo':
       return '/seo';
+    case 'competitors':
+      return '/competitors';
     default:
       return '/';
   }
@@ -182,6 +185,16 @@ function AppContent() {
             onClearPlanPrompt={() => setIsResetDialogOpen(true)}
             onPlanUpdated={(updated) => setPlan(updated)}
             initialTab="seo"
+          />
+        )}
+
+        {currentView === 'competitors' && plan && (
+          <DashboardPage
+            plan={plan}
+            onEditAssessment={() => navigateTo('assessment')}
+            onClearPlanPrompt={() => setIsResetDialogOpen(true)}
+            onPlanUpdated={(updated) => setPlan(updated)}
+            initialTab="competitors"
           />
         )}
 

@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { ArrowUpRight, CheckCircle2, Menu, X, Compass, HelpCircle, Info, ShieldCheck, FileText, Layers, Globe } from 'lucide-react';
+import { ArrowUpRight, CheckCircle2, Menu, X, Compass, HelpCircle, Info, ShieldCheck, FileText, Layers, Globe, Users } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 import { TapGrowLogo } from './brand/TapGrowLogo';
 
 interface AppHeaderProps {
-  currentView: 'landing' | 'assessment' | 'dashboard' | 'workspace' | 'seo' | 'how-it-works' | 'about' | 'privacy';
-  onNavigate: (view: 'landing' | 'assessment' | 'dashboard' | 'workspace' | 'seo' | 'how-it-works' | 'about' | 'privacy') => void;
+  currentView: 'landing' | 'assessment' | 'dashboard' | 'workspace' | 'seo' | 'competitors' | 'how-it-works' | 'about' | 'privacy';
+  onNavigate: (view: 'landing' | 'assessment' | 'dashboard' | 'workspace' | 'seo' | 'competitors' | 'how-it-works' | 'about' | 'privacy') => void;
   hasExistingPlan: boolean;
   onClearPlanPrompt?: () => void;
 }
@@ -17,7 +17,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const handleNavClick = (view: 'landing' | 'assessment' | 'dashboard' | 'workspace' | 'seo' | 'how-it-works' | 'about' | 'privacy') => {
+  const handleNavClick = (view: 'landing' | 'assessment' | 'dashboard' | 'workspace' | 'seo' | 'competitors' | 'how-it-works' | 'about' | 'privacy') => {
     onNavigate(view);
     setMobileMenuOpen(false);
   };
@@ -107,6 +107,16 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               >
                 <Globe className="h-4 w-4 text-[#16866F] dark:text-[#65D6B2]" />
                 <span>SEO Checker</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleNavClick('competitors')}
+                className={`flex items-center gap-1.5 transition-colors hover:text-slate-900 dark:hover:text-[#F2F7F5] whitespace-nowrap ${
+                  currentView === 'competitors' ? 'font-semibold text-[#16866F] dark:text-[#65D6B2]' : ''
+                }`}
+              >
+                <Users className="h-4 w-4 text-[#16866F] dark:text-[#65D6B2]" />
+                <span>Competitors</span>
               </button>
             </>
           )}
@@ -243,6 +253,18 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                 >
                   <Globe className="h-4 w-4 text-[#16866F] dark:text-[#65D6B2]" />
                   <span>Website & SEO Checker</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleNavClick('competitors')}
+                  className={`flex items-center gap-3 w-full rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-colors ${
+                    currentView === 'competitors'
+                      ? 'bg-[#E0F5EE] dark:bg-[#16866F]/20 text-[#16866F] dark:text-[#65D6B2] font-semibold'
+                      : 'text-slate-700 dark:text-[#B5C5C7] hover:bg-slate-100 dark:hover:bg-[#1D3039]'
+                  }`}
+                >
+                  <Users className="h-4 w-4 text-[#16866F] dark:text-[#65D6B2]" />
+                  <span>Competitor Intelligence</span>
                 </button>
               </>
             )}

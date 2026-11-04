@@ -7,6 +7,7 @@ import {
   SeoAuditReport,
 } from '../../types/seoChecker';
 import { runWebsiteAudit, normalizeWebsiteUrl } from './seoApiService';
+import { formatAuditErrorMessage } from './errorFormatter';
 import {
   loadSavedAudits,
   saveAuditReport,
@@ -138,7 +139,8 @@ export const SeoCheckerTab: React.FC<SeoCheckerTabProps> = ({ answers }) => {
       setSavedAudits(loadSavedAudits());
     } catch (err: any) {
       console.error('Audit execution error:', err);
-      setAuditError(err.message || 'Failed to complete website audit. Please verify the URL is publicly reachable.');
+      const friendlyError = formatAuditErrorMessage(err);
+      setAuditError(friendlyError);
     } finally {
       clearTimeout(timer1);
       clearTimeout(timer2);
@@ -383,14 +385,34 @@ export const SeoCheckerTab: React.FC<SeoCheckerTabProps> = ({ answers }) => {
 
           {/* Error Message */}
           {auditError && (
-            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-xs text-red-700 dark:bg-red-950/30 dark:border-red-900/50 dark:text-red-300 flex items-start gap-2.5">
-              <AlertCircle className="h-4 w-4 text-red-600 shrink-0 mt-0.5" />
-              <div>
-                <p className="font-bold">Audit Could Not Complete</p>
-                <p className="mt-0.5 leading-relaxed">{auditError}</p>
-                <p className="mt-2 text-[11px] text-red-600/80">
-                  Tip: Ensure the domain is public and online. If you are developing locally, click one of the sample demo buttons above to explore the full suite of diagnostic checks.
-                </p>
+            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-xs text-red-700 dark:bg-red-950/30 dark:border-red-900/50 dark:text-red-300 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 animate-in fade-in">
+              <div className="flex items-start gap-2.5">
+                <AlertCircle className="h-4 w-4 text-red-600 shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-bold text-red-800 dark:text-red-200">Audit Could Not Complete</p>
+                  <p className="mt-0.5 leading-relaxed text-red-700 dark:text-red-300">{auditError}</p>
+                  <p className="mt-1 text-[11px] text-red-600/80 dark:text-red-400/80">
+                    Your entered URL has been preserved. Check that the domain is public and reachable.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 self-start sm:self-center shrink-0">
+                <button
+                  type="button"
+                  onClick={() => handleRunAudit()}
+                  disabled={isRunning}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700 shadow-2xs transition-colors"
+                >
+                  <RefreshCw className="h-3.5 w-3.5" />
+                  <span>Retry Audit</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAuditError(null)}
+                  className="rounded-lg border border-red-200 dark:border-red-900/50 px-2.5 py-1.5 text-xs font-medium text-red-700 dark:text-red-300 hover:bg-red-100/50 transition-colors"
+                >
+                  Dismiss
+                </button>
               </div>
             </div>
           )}
@@ -497,6 +519,15 @@ export const SeoCheckerTab: React.FC<SeoCheckerTabProps> = ({ answers }) => {
                     <span className="text-xs text-slate-500 dark:text-[#91A5A9]">
                       {formatDate(currentReport.timestamp)}
                     </span>
+                    {currentReport.url.includes('.example.com') && (
+                      <>
+                        <span className="text-slate-300 dark:text-[#304650]">·</span>
+                        <span className="inline-flex items-center gap-1 rounded-md bg-purple-100 text-purple-800 dark:bg-purple-950/40 dark:text-purple-300 px-2 py-0.5 text-[11px] font-bold">
+                          <Sparkles className="h-3 w-3" />
+                          Sample Demonstration (Demo Snapshot)
+                        </span>
+                      </>
+                    )}
                   </div>
 
                   <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-[#F2F7F5] truncate max-w-lg">
